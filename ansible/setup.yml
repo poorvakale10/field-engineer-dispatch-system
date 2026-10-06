@@ -1,0 +1,36 @@
+- name: Configure Field Engineer Dispatch System
+  hosts: dispatch
+  become: false
+  vars:
+    app_dir: "{{ ansible_env.HOME }}/dispatchflow"
+  tasks:
+    - name: Create app directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: "0755"
+    - name: Create logs directory
+      ansible.builtin.file:
+        path: "{{ app_dir }}/logs"
+        state: directory
+        mode: "0755"
+    - name: Check Docker
+      ansible.builtin.command: docker --version
+      register: docker_version
+      changed_when: false
+    - name: Write environment marker
+      ansible.builtin.copy:
+        dest: "{{ app_dir }}/ENVIRONMENT.txt"
+        content: "DispatchFlow managed by Ansible
+{{ docker_version.stdout }}
+"
+        mode: "0644"
+    - name: Health check
+      ansible.builtin.uri:
+        url: http://localhost:8080/health
+        status_code: 200
+      register: health
+      failed_when: false
+    - name: Show health
+      ansible.builtin.debug:
+        msg: "Health status: {{ health.status | default('not running') }}"

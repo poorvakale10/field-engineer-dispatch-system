@@ -1,0 +1,11 @@
+<!doctype html><html xmlns:th="http://www.thymeleaf.org"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DispatchFlow | Dispatch</title><link rel="stylesheet" href="/css/app.css"></head>
+<body><div class="app-shell"><aside class="sidebar"><div class="brand"><div class="brand-mark">DF</div>Dispatch<span>Flow</span></div><nav><a href="/">⌂ &nbsp;Dashboard</a><a href="/requests">▤ &nbsp;Service Requests</a><a class="active" href="/requests/new">＋ &nbsp;New Dispatch</a></nav></aside>
+<main class="main"><header class="topbar"><div><div class="eyebrow">FIELD OPERATIONS</div><h1 th:text="${request.id==null?'Create dispatch':'Update dispatch'}">Create dispatch</h1><p class="muted">Capture the request and assign the right engineer.</p></div></header>
+<div class="panel form-panel"><form th:action="${request.id==null?'/requests':'/requests/'+request.id}" method="post" class="grid-form">
+<label>Customer name<input id="customerName" name="customerName" th:value="${request.customerName}" required placeholder="e.g. Aarav Mehta"></label><label>Location<input id="location" name="location" th:value="${request.location}" required placeholder="e.g. Mumbai"></label>
+<label class="full">Issue description<textarea id="issue" name="issue" required placeholder="Describe the issue..." th:text="${request.issue}"></textarea></label>
+<label>Priority<select id="priority" name="priority"><option>LOW</option><option selected>MEDIUM</option><option>HIGH</option><option>CRITICAL</option></select></label>
+<label>Engineer<input id="engineer" name="engineer" th:value="${request.engineer}" placeholder="e.g. Amit Patil"></label>
+<label>Status<select id="status" name="status"><option>CREATED</option><option>ASSIGNED</option><option>IN_PROGRESS</option><option>COMPLETED</option><option>CANCELLED</option></select></label>
+<div class="form-actions full"><a href="/requests" class="btn btn-secondary">Cancel</a><button id="saveButton" class="btn btn-primary" type="submit">Save dispatch →</button></div>
+</form></div></main></div></body></html>

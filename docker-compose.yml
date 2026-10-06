@@ -1,0 +1,7 @@
+services:
+  dispatchflow:
+    build: .
+    image: poorvakale/dispatchflow:1.0.0
+    container_name: dispatchflow
+    ports: ["8080:8080"]
+    restart: unless-stopped
