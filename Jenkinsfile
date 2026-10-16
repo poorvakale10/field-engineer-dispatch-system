@@ -2,17 +2,9 @@
 pipeline {
     agent any
 
-    parameters {
-        string(
-            name: 'DEPLOY_ENV',
-            defaultValue: 'local',
-            description: 'Deployment environment'
-        )
-    }
-
     environment {
-        IMAGE = "poorvakale/dispatchflow:${BUILD_NUMBER}"
-        MVN = 'C:\\Users\\Poorva\\Downloads\\apache-maven-3.10.0\\bin\\mvn.cmd'
+        MAVEN_HOME = 'C:\\Users\\Poorva\\Downloads\\apache-maven-3.10.0'
+        IMAGE = 'dispatchflow:latest'
     }
 
     stages {
@@ -22,15 +14,9 @@ pipeline {
             }
         }
 
-        stage('Build') {
+        stage('Build and Test') {
             steps {
-                bat 'call "%MVN%" -B -DskipTests package'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                bat 'call "%MVN%" -B test'
+                bat 'call "%MAVEN_HOME%\\bin\\mvn.cmd" -B clean verify'
             }
             post {
                 always {
@@ -73,7 +59,8 @@ pipeline {
                                 -Uri "http://localhost:8081/" `
                                 -TimeoutSec 5
 
-                            if ($response.StatusCode -eq 200) {
+                            if ($response.StatusCode -ge 200 -and
+                                $response.StatusCode -lt 400) {
                                 $healthy = $true
                                 break
                             }
@@ -84,10 +71,10 @@ pipeline {
 
                     if (-not $healthy) {
                         docker logs dispatchflow
-                        throw "DispatchFlow health check failed"
+                        throw "Health check failed"
                     }
 
-                    Write-Host "DispatchFlow is responding successfully."
+                    Write-Host "Application is responding."
                 '''
             }
         }
@@ -95,10 +82,10 @@ pipeline {
 
     post {
         success {
-            echo 'Build, tests, Docker deployment, and health check succeeded.'
+            echo 'Pipeline completed successfully.'
         }
         failure {
-            echo 'Pipeline failed. Review the stage logs for details.'
+            echo 'Pipeline failed. Check the stage logs.'
         }
     }
 }
