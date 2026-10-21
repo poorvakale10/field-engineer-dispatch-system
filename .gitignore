@@ -6,3 +6,5 @@ data/
 *.log
 .env
 selenium-screenshots/*.png
+
+app.jar
