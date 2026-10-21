@@ -43,15 +43,17 @@ pipeline {
             }
         }
 
+        
         stage('Deploy') {
             steps {
                 bat '''
-                    docker rm -f dispatchflow 2>NUL
-                    docker run -d --name dispatchflow -p 8081:8080 %IMAGE%
+                    "%DOCKER_PATH%\\docker.exe" rm -f dispatchflow 2>NUL
+                    "%DOCKER_PATH%\\docker.exe" run -d --name dispatchflow -p 8081:8080 %IMAGE%
                     if errorlevel 1 exit /b 1
                 '''
             }
         }
+
 
         stage('Health Check') {
             steps {
