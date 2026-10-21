@@ -3,8 +3,9 @@ pipeline {
     agent any
 
     environment {
-        MAVEN_HOME = 'C:\\Users\\Poorva\\Downloads\\apache-maven-3.10.0'
-        IMAGE = 'dispatchflow:latest'
+    MAVEN_HOME = 'C:\\Users\\Poorva\\Downloads\\apache-maven-3.10.0'
+    DOCKER_PATH = 'C:\\Users\\Poorva\\AppData\\Local\\Programs\\DockerDesktop\\resources\\bin'
+    IMAGE = 'dispatchflow:latest'
     }
 
     stages {
@@ -36,16 +37,8 @@ pipeline {
         stage('Docker Build') {
             steps {
                 bat '''
-                    echo Checking application JAR...
-                    if not exist "target\\field-engineer-dispatch-system.jar" (
-                        echo ERROR: Application JAR not found.
-                        echo Current workspace: %CD%
-                        dir
-                        dir target
-                        exit /b 1
-                    )
-                    echo JAR found. Building Docker image...
-                    docker build --no-cache -t %IMAGE% .
+                    "%DOCKER_PATH%\\docker.exe" --version
+                    "%DOCKER_PATH%\\docker.exe" build --no-cache -t %IMAGE% .
                 '''
             }
         }
