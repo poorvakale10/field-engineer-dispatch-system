@@ -35,7 +35,18 @@ pipeline {
 
         stage('Docker Build') {
             steps {
-                bat 'docker build -t %IMAGE% .'
+                bat '''
+                    echo Checking application JAR...
+                    if not exist "target\\field-engineer-dispatch-system.jar" (
+                        echo ERROR: Application JAR not found.
+                        echo Current workspace: %CD%
+                        dir
+                        dir target
+                        exit /b 1
+                    )
+                    echo JAR found. Building Docker image...
+                    docker build --no-cache -t %IMAGE% .
+                '''
             }
         }
 
@@ -44,6 +55,7 @@ pipeline {
                 bat '''
                     docker rm -f dispatchflow 2>NUL
                     docker run -d --name dispatchflow -p 8081:8080 %IMAGE%
+                    if errorlevel 1 exit /b 1
                 '''
             }
         }
@@ -56,6 +68,7 @@ pipeline {
                     for ($i = 0; $i -lt 12; $i++) {
                         try {
                             $response = Invoke-WebRequest `
+                                -UseBasicParsing `
                                 -Uri "http://localhost:8081/" `
                                 -TimeoutSec 5
 
@@ -71,10 +84,10 @@ pipeline {
 
                     if (-not $healthy) {
                         docker logs dispatchflow
-                        throw "Health check failed"
+                        throw "Health check failed: application did not respond successfully."
                     }
 
-                    Write-Host "Application is responding."
+                    Write-Host "SUCCESS: DispatchFlow is responding on port 8081."
                 '''
             }
         }
@@ -82,10 +95,10 @@ pipeline {
 
     post {
         success {
-            echo 'Pipeline completed successfully.'
+            echo 'SUCCESS: Build, tests, Docker deployment, and health check completed.'
         }
         failure {
-            echo 'Pipeline failed. Check the stage logs.'
+            echo 'FAILED: Check the first failed stage in Console Output.'
         }
     }
 }
